@@ -34,28 +34,39 @@ library UniswapV2Library {
 
     // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
     function quote(uint amountA, uint reserveA, uint reserveB) internal pure returns (uint amountB) {
+        //TODO: add price as an argument (price A in B tokens) | carefull with decimals
+        uint price = 1;
         require(amountA > 0, 'UniswapV2Library: INSUFFICIENT_AMOUNT');
         require(reserveA > 0 && reserveB > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
-        amountB = amountA.mul(reserveB) / reserveA;
+        //amountB = amountA.mul(reserveB) / reserveA; // means aB = aA*price, price is how many B should cost 1 A (ie 1 A price)
+        amountB = amountA.mul(price);
     }
 
     // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
+        //TODO: add price as an argument (price A in B tokens) | carefull with decimals
+        uint price = 1;
         require(amountIn > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT');
         require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
         uint amountInWithFee = amountIn.mul(997);
-        uint numerator = amountInWithFee.mul(reserveOut);
-        uint denominator = reserveIn.mul(1000).add(amountInWithFee);
-        amountOut = numerator / denominator;
+        // uint numerator = amountInWithFee.mul(reserveOut);
+        // uint denominator = reserveIn.mul(1000).add(amountInWithFee);
+        // amountOut = numerator / denominator;
+        uint denominator = 1000;
+        amountOut = amountInWithFee.mul(price) / denominator;
     }
 
     // given an output amount of an asset and pair reserves, returns a required input amount of the other asset
     function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) internal pure returns (uint amountIn) {
+        //TODO: add price as an argument (price A in B tokens) | carefull with decimals
+        uint price = 1;
         require(amountOut > 0, 'UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT');
         require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
-        uint numerator = reserveIn.mul(amountOut).mul(1000);
-        uint denominator = reserveOut.sub(amountOut).mul(997);
-        amountIn = (numerator / denominator).add(1);
+        // uint numerator = reserveIn.mul(amountOut).mul(1000);
+        // uint denominator = reserveOut.sub(amountOut).mul(997);
+        
+        uint grossAmountIn = amountOut/price;
+        amountIn = grossAmountIn.mul(997)/1000;
     }
 
     // performs chained getAmountOut calculations on any number of pairs
